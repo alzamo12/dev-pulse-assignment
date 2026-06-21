@@ -12,7 +12,7 @@ export const initDB = async () => {
             CREATE TABLE IF NOT EXISTS users(
             id SERIAL PRIMARY KEY,
             name VARCHAR(30) NOT NULL,
-            email VARCHAR(20) NOT NULL UNIQUE,
+            email VARCHAR(30) NOT NULL UNIQUE,
             password TEXT NOT NULL,
             role VARCHAR(15) DEFAULT 'contributor',
 
