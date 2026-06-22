@@ -22,6 +22,20 @@ export const initDB = async () => {
             )
             `);
 
+        await pool.query(`
+            CREATE TABLE IF NOT EXISTS issues(
+            id SERIAL PRIMARY KEY,
+            title VARCHAR(150) NOT NULL,
+            description TEXT CHECK (LENGTH(description) >= 20) NOT NULL,
+            type VARCHAR(20),
+            status VARCHAR(20) DEFAULT 'open',
+            reporter_id INT REFERENCES users(id),
+            
+            created_at TIMESTAMP DEFAULT NOW(),
+            updated_at TIMESTAMP DEFAULT NOW()
+            )
+            `)
+
         console.log("database had initialized successfully")
     } catch (err) {
         console.log(err)
