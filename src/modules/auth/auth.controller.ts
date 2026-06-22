@@ -22,7 +22,15 @@ const createUser = async (req: Request, res: Response) => {
 const loginUser = async (req: Request, res: Response) => {
     try {
         const result = await authService.loginUserIntoDB(req.body);
-        
+        const {user, token} = result;
+        res.status(201).send({
+            success: true,
+            message: 'Login Successful',
+            data: {
+                token,
+                user
+            }
+        })
 
     } catch (err: any) {
         res.status(500).send({

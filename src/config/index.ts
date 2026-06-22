@@ -1,4 +1,5 @@
 import dotenv from "dotenv";
+import { access } from "fs";
 import path from "path";
 
 dotenv.config({
@@ -7,7 +8,8 @@ dotenv.config({
 
 const config = {
     port: process.env.PORT,
-    connection_string: process.env.CONNECTION_STRING
+    connection_string: process.env.CONNECTION_STRING,
+    access_token: process.env.ACCESS_TOKEN
 };
 
 export default config;
