@@ -1,6 +1,8 @@
 import type { Request, Response } from "express";
 import { issuesService } from "./issues.service";
 import { sendResponse } from "../../utils/sendResponse/sendResponse";
+import { JwtPayload } from "jsonwebtoken";
+import { IUser } from "../auth/auth.interface";
 
 const createIssue = async (req: Request, res: Response) => {
     try {
@@ -46,8 +48,18 @@ const getSingleIssue = async (req: Request, res: Response) => {
     }
 };
 
+const updateIssue = async (req: Request, res: Response) => {
+    try {
+        const result = await issuesService.updateIssueInDB(Number(req.params.id), req.body, req.user as IUser);
+        sendResponse(res, 200, true, 'Issues updated successfully', result);
+    } catch (err: any) {
+        sendResponse(res, 500, false, err.message, err)
+    }
+}
+
 export const issuesController = {
     createIssue,
     getAllIssues,
-    getSingleIssue
+    getSingleIssue,
+    updateIssue
 };

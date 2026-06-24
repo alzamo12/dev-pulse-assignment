@@ -1,6 +1,8 @@
+import { JwtPayload } from "jsonwebtoken";
 import { pool } from "../../db";
-import { IIssues, TIssueQuery } from "./issues.interface";
-
+import { IIssues, IUpdateIssue, TIssueQuery } from "./issues.interface";
+import { sendResponse } from "../../utils/sendResponse/sendResponse";
+import { IUser } from "../auth/auth.interface"
 const types: string[] = ['bug', 'feature_request'];
 
 const createIssueIntoDB = async (payload: IIssues, reporter_id: string) => {
@@ -117,10 +119,79 @@ const getSingleIssueFromDB = async (id: number) => {
     };
 
     return result;
-}
+};
+
+const updateIssueInDB = async (
+    issueId: number,
+    payload: IUpdateIssue,
+    user: IUser
+) => {
+
+    const issueResult = await pool.query(
+        `SELECT * FROM issues WHERE id = $1`,
+        [issueId]
+    );
+
+    const issue = issueResult.rows[0];
+
+    if (!issue) {
+        throw new Error('issue not found')
+    }
+
+    // Authorization
+
+    if (user.role === "contributor") {
+
+        if (issue.reporter_id !== user.id) {
+            throw new Error("You can update you own issue only")
+        }
+
+        if (issue.status !== "open") {
+            throw new Error("issue is not open yet")
+        }
+    }
+
+    const updates: string[] = [];
+    const values: unknown[] = [];
+
+    if (payload.title) {
+        values.push(payload.title);
+        updates.push(`title = $${values.length}`);
+    }
+
+    if (payload.description) {
+        values.push(payload.description);
+        updates.push(`description = $${values.length}`);
+    }
+
+    if (payload.type) {
+        values.push(payload.type);
+        updates.push(`type = $${values.length}`);
+    }
+
+    updates.push(`updated_at = CURRENT_TIMESTAMP`);
+
+    values.push(issueId);
+
+    const query = `
+        UPDATE issues
+        SET ${updates.join(", ")}
+        WHERE id = $${values.length}
+        RETURNING *
+      `;
+
+    const result = await pool.query(query, values);
+    // const result = await pool.query(`
+    // UPDATE issues 
+    // SET ${updates.join(",")}
+    // `, [])
+
+    return result.rows[0];
+};
 
 export const issuesService = {
     createIssueIntoDB,
     getAllIssuesFromDB,
-    getSingleIssueFromDB
+    getSingleIssueFromDB,
+    updateIssueInDB
 }
