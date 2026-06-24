@@ -1,5 +1,6 @@
 import type { Request, Response } from "express";
 import { issuesService } from "./issues.service";
+import { sendResponse } from "../../utils/sendResponse/sendResponse";
 
 const createIssue = async (req: Request, res: Response) => {
     try {
@@ -22,11 +23,16 @@ const createIssue = async (req: Request, res: Response) => {
 
 const getAllIssues = async (req: Request, res: Response) => {
     try {
-        const result = await issuesService.getAllIssuesFromDB();
-        // console.log(result)
-        res.send(result.rows)
-    } catch (err) {
+        const { sort = "newest", type, status } = req.query;
 
+        const result = await issuesService.getAllIssuesFromDB({
+            sort: sort as 'newest' | 'oldest',
+            type: type as 'bug' | 'feature_request',
+            status: status as 'open' | 'in_progress' | 'resolved'
+        });
+        sendResponse(res, 200, true, 'Issues retrieved successfully', result)
+    } catch (err: any) {
+        sendResponse(res, 500, false, err.message, err)
     }
 }
 
