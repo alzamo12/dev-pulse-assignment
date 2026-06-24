@@ -20,6 +20,17 @@ const createIssue = async (req: Request, res: Response) => {
     }
 };
 
+const getAllIssues = async (req: Request, res: Response) => {
+    try {
+        const result = await issuesService.getAllIssuesFromDB();
+        // console.log(result)
+        res.send(result.rows)
+    } catch (err) {
+
+    }
+}
+
 export const issuesController = {
-    createIssue
+    createIssue,
+    getAllIssues
 };

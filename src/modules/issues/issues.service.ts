@@ -2,7 +2,6 @@ import { pool } from "../../db";
 import { IIssues } from "./issues.interface";
 
 const types: string[] = ['bug', 'feature_request'];
-const statuses: string[] = ['open', 'in_progress', 'resolved'];
 
 const createIssueIntoDB = async (payload: IIssues, reporter_id: string) => {
     const { title, description, type } = payload;
@@ -20,6 +19,14 @@ const createIssueIntoDB = async (payload: IIssues, reporter_id: string) => {
     return result.rows[0];
 };
 
+const getAllIssuesFromDB = async() => {
+    const result = await pool.query(`
+            SELECT * FROM issues
+        `,[])
+    return result
+}
+
 export const issuesService = {
-    createIssueIntoDB
+    createIssueIntoDB,
+    getAllIssuesFromDB
 }
