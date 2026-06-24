@@ -68,7 +68,7 @@ const getAllIssuesFromDB = async (query: TIssueQuery) => {
         reporterResult.rows.map(user => [user.id, user])
     );
 
-    return issues.map(issue => ({
+    const result = issues.map(issue => ({
         id: issue.id,
         title: issue.title,
         description: issue.description,
@@ -78,9 +78,49 @@ const getAllIssuesFromDB = async (query: TIssueQuery) => {
         created_at: issue.created_at,
         updated_at: issue.updated_at,
     }));
+
+    return result
 };
+
+const getSingleIssueFromDB = async (id: number) => {
+    const issueResult = await pool.query(
+        `SELECT * FROM issues WHERE id = $1`,
+        [id]
+    );
+
+    const issue = issueResult.rows[0];
+
+    if (!issue) {
+        throw new Error("Issue not found")
+    };
+
+    const reporterResult = await pool.query(
+        `
+    SELECT id, name, role
+    FROM users
+    WHERE id = $1
+  `,
+        [issue.reporter_id]
+    );
+
+    const reporter = reporterResult.rows[0];
+
+    const result = {
+        id: issue.id,
+        title: issue.title,
+        description: issue.description,
+        type: issue.type,
+        status: issue.status,
+        reporter,
+        created_at: issue.created_at,
+        updated_at: issue.updated_at,
+    };
+
+    return result;
+}
 
 export const issuesService = {
     createIssueIntoDB,
-    getAllIssuesFromDB
+    getAllIssuesFromDB,
+    getSingleIssueFromDB
 }
