@@ -14,10 +14,10 @@ export const sendResponse = (res: Response, status: number, success: boolean, me
         message,
     };
 
-    if (success) {
+    if (success && data) {
         response.data = data
     }
-    else {
+    else if (!success && data) {
         response.error = data
     };
 

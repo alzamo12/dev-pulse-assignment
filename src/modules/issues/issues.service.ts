@@ -189,9 +189,19 @@ const updateIssueInDB = async (
     return result.rows[0];
 };
 
+const deleteIssueFromDB = async(role:string, id:number) => {
+    if(role !== 'maintainer'){
+        throw new Error("unauthorized access");
+    }
+    const result = await pool.query(`
+            DELETE FROM issues WHERE id=$1
+        `,[id]);
+}
+
 export const issuesService = {
     createIssueIntoDB,
     getAllIssuesFromDB,
     getSingleIssueFromDB,
-    updateIssueInDB
+    updateIssueInDB,
+    deleteIssueFromDB
 }

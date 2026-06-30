@@ -8,6 +8,12 @@ import config from "../../config";
 const createUserIntoDB = async (payload: IUser) => {
     const { name, email, password, role } = payload;
 
+    const roles = ['contributor', 'maintainer'];
+
+    if (!roles.includes(role as string)) {
+        throw new Error("Invalid data")
+    }
+
     const hashPassword = await bcrypt.hash(password, 10);
 
     const result = await pool.query(`
@@ -50,7 +56,7 @@ const loginUserIntoDB = async (payload: any) => {
 
     delete user.password
 
-    return {user, token}
+    return { user, token }
 }
 
 export const authService = {
