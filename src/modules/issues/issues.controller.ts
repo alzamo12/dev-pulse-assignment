@@ -1,13 +1,11 @@
 import type { Request, Response } from "express";
 import { issuesService } from "./issues.service";
 import { sendResponse } from "../../utils/sendResponse/sendResponse";
-import { JwtPayload } from "jsonwebtoken";
-import { IUser } from "../auth/auth.interface";
+import type{ IUser } from "../auth/auth.interface";
 
 const createIssue = async (req: Request, res: Response) => {
     try {
         const result = await issuesService.createIssueIntoDB(req.body, req?.user?.id);
-        // console.log(req.user)
         res.status(201).send({
             success: true,
             message: "Issue created successfully",

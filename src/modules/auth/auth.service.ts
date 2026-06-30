@@ -1,18 +1,17 @@
 import bcrypt from "bcryptjs";
 import { pool } from "../../db";
-import { IUser } from "./auth.interface";
-import { threadCpuUsage } from "node:process";
-import jwt, { JwtPayload } from "jsonwebtoken";
+import type { IUser } from "./auth.interface";
+import jwt from "jsonwebtoken";
 import config from "../../config";
 
 const createUserIntoDB = async (payload: IUser) => {
     const { name, email, password, role } = payload;
 
-    const roles = ['contributor', 'maintainer'];
+    // const roles = ['contributor', 'maintainer'];
 
-    if (!roles.includes(role as string)) {
-        throw new Error("Invalid data")
-    }
+    // if (!roles.includes(role as string)) {
+    //     throw new Error(`invalid role: ${role}`)
+    // }
 
     const hashPassword = await bcrypt.hash(password, 10);
 

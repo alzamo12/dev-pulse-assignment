@@ -1,14 +1,12 @@
-import { JwtPayload } from "jsonwebtoken";
 import { pool } from "../../db";
-import { IIssues, IUpdateIssue, TIssueQuery } from "./issues.interface";
-import { sendResponse } from "../../utils/sendResponse/sendResponse";
-import { IUser } from "../auth/auth.interface"
-const types: string[] = ['bug', 'feature_request'];
+import type{ IIssues, IUpdateIssue, TIssueQuery } from "./issues.interface";
+import type { IUser } from "../auth/auth.interface"
 
 const createIssueIntoDB = async (payload: IIssues, reporter_id: string) => {
+    const types: string[] = ['bug', 'feature_request'];
     const { title, description, type } = payload;
 
-    if ((type && !types.includes(type))) { //bug or feature_request
+    if ((type && !types.includes(type))) {
         throw new Error("Invalid information")
     };
 
@@ -17,13 +15,12 @@ const createIssueIntoDB = async (payload: IIssues, reporter_id: string) => {
                     VALUES($1, $2, $3, $4)
                     RETURNING *
         `, [title, description, type, reporter_id]);
-    // return result
     return result.rows[0];
 };
 
 const getAllIssuesFromDB = async (query: TIssueQuery) => {
     const conditions: string[] = [];
-    const values: any[] = [];
+    const values: string[] = [];
 
     let sql = `SELECT * FROM issues`;
 
@@ -67,8 +64,9 @@ const getAllIssuesFromDB = async (query: TIssueQuery) => {
     );
 
     const reporterMap = new Map(
-        reporterResult.rows.map(user => [user.id, user])
+        reporterResult.rows.map(reporter => [reporter.id, reporter])
     );
+
 
     const result = issues.map(issue => ({
         id: issue.id,
@@ -96,27 +94,30 @@ const getSingleIssueFromDB = async (id: number) => {
         throw new Error("Issue not found")
     };
 
+    const { id: issueId, title, description, type, status, reporter_id, created_at, updated_at } = issue;
+
     const reporterResult = await pool.query(
         `
     SELECT id, name, role
     FROM users
     WHERE id = $1
   `,
-        [issue.reporter_id]
+        [reporter_id]
     );
 
     const reporter = reporterResult.rows[0];
 
     const result = {
-        id: issue.id,
-        title: issue.title,
-        description: issue.description,
-        type: issue.type,
-        status: issue.status,
+        id: issueId,
+        title: title,
+        description: description,
+        type: type,
+        status: status,
         reporter,
-        created_at: issue.created_at,
-        updated_at: issue.updated_at,
+        created_at: created_at,
+        updated_at: updated_at,
     };
+
 
     return result;
 };
@@ -189,13 +190,13 @@ const updateIssueInDB = async (
     return result.rows[0];
 };
 
-const deleteIssueFromDB = async(role:string, id:number) => {
-    if(role !== 'maintainer'){
+const deleteIssueFromDB = async (role: string, id: number) => {
+    if (role !== 'maintainer') {
         throw new Error("unauthorized access");
     }
     const result = await pool.query(`
             DELETE FROM issues WHERE id=$1
-        `,[id]);
+        `, [id]);
 }
 
 export const issuesService = {
